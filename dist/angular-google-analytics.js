@@ -56,6 +56,10 @@
        * Configuration Methods
        **/
 
+      this.setCreated = function(val){
+        created = val;
+      };
+
       this.setAccount = function (tracker) {
         if (angular.isUndefined(tracker) || tracker === false) {
           accounts = undefined;
@@ -466,10 +470,10 @@
             return;
           }
 
-          if (created === true) {
-            that._log('warn', 'ga.js or analytics.js script tag already created');
-            return;
-          }
+          // if (created === true) {
+          //   that._log('warn', 'ga.js or analytics.js script tag already created');
+          //   return;
+          // }
 
           if (disableAnalytics === true) {
             accounts.forEach(function (trackerObj) {
@@ -478,24 +482,26 @@
             });
           }
 
-          var document = $document[0];
-          var protocol = hybridMobileSupport === true ? 'https:' : '';
-          var scriptSource = protocol + '//www.google-analytics.com/' + (debugMode ? 'analytics_debug.js' : 'analytics.js');
-          if (testMode !== true) {
-            // If not in test mode inject the Google Analytics tag
-            (function (i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function (){
-              (i[r].q=i[r].q||[]).push(arguments);},i[r].l=1*new Date();a=s.createElement(o),
-              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m);
-            })(window,document,'script',scriptSource,'ga');
-          } else {
-            if (typeof $window.ga !== 'function') {
-              // In test mode create a ga function if none exists that is a noop sink.
-              $window.ga = function () {
-                   that._log('debug', 'ga(' + Array.prototype.slice.call(arguments).join() + ')');                
-              };
+          if (created !== true) {
+            var document = $document[0];
+            var protocol = hybridMobileSupport === true ? 'https:' : '';
+            var scriptSource = protocol + '//www.google-analytics.com/' + (debugMode ? 'analytics_debug.js' : 'analytics.js');
+            if (testMode !== true) {
+              // If not in test mode inject the Google Analytics tag
+              (function (i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function (){
+                (i[r].q=i[r].q||[]).push(arguments);},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m);
+              })(window,document,'script',scriptSource,'ga');
+            } else {
+              if (typeof $window.ga !== 'function') {
+                // In test mode create a ga function if none exists that is a noop sink.
+                $window.ga = function () {
+                     that._log('debug', 'ga(' + Array.prototype.slice.call(arguments).join() + ')');                
+                };
+              }
+              // Log script injection.
+              that._log('inject', scriptSource);
             }
-            // Log script injection.
-            that._log('inject', scriptSource);
           }
 
           if (traceDebuggingMode) {
